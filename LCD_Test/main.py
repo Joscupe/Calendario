@@ -1,5 +1,30 @@
+import machine
 from machine import Pin
 import utime
+def pulseE():
+    E.value(1)
+    utime.sleep_us(40)
+    E.value(0)
+    utime.sleep_us(40)
+
+def send2LCD(BinNum):
+    DB0.value((BinNum & 0b00000001) >> 0)
+    DB1.value((BinNum & 0b00000010) >> 1)
+    DB2.value((BinNum & 0b00000100) >> 2)
+    DB3.value((BinNum & 0b00001000) >> 3)
+    DB4.value((BinNum & 0b00010000) >> 4)
+    DB5.value((BinNum & 0b00100000) >> 5)
+    DB6.value((BinNum & 0b01000000) >> 6)
+    DB7.value((BinNum & 0b10000000) >> 7)
+    pulseE()
+def setupLCD():
+    RS.value(0)
+    send2LCD(0b0000111111)
+    send2LCD(0b0010111010) # 2 line mode
+    send2LCD(0b0001000000) # Set DDRAM address to 0
+    RS.value(1)
+
+
 
 CS1 = Pin(0, Pin.OUT)
 CS2 = Pin(1, Pin.OUT)
@@ -16,79 +41,12 @@ DB5 = Pin(13, Pin.OUT)
 DB6 = Pin(14, Pin.OUT)
 DB7 = Pin(15, Pin.OUT)
 LED = Pin(25, Pin.OUT)
-
-
-def turnOnLCD():
-    RS.value(0)
-    RW.value(0)
-    DB7.value(0)
-    DB6.value(0)
-    DB5.value(1)
-    DB4.value(1)
-    DB3.value(1)
-    DB2.value(1)
-    DB1.value(1)
-    DB0.value(1)
-
-def turnOffLCD():
-    RS.value(0)
-    RW.value(0)
-    DB7.value(0)
-    DB6.value(0)
-    DB5.value(1)
-    DB4.value(1)
-    DB3.value(1)
-    DB2.value(1)
-    DB1.value(1)
-    DB0.value(0)
-
-
-def setcmd(cmd):
-    RS.value(int(cmd[0]))
-    RW.value(int(cmd[1]))
-    DB7.value(int(cmd[2]))
-    DB6.value(int(cmd[3]))
-    DB5.value(int(cmd[4]))
-    DB4.value(int(cmd[5]))
-    DB3.value(int(cmd[6]))
-    DB2.value(int(cmd[7]))
-    DB1.value(int(cmd[8]))
-    DB0.value(int(cmd[9]))
-
-print("Hello World!")
 LED.value(1)
-utime.sleep(0.5)
-for i in range(5):
-    LED.value(0)
-    utime.sleep(0.1)
-    LED.value(1)
-    utime.sleep(0.1)
+setupLCD()
+inputString = "Hello World!"
+print(0b1000000000 | 0b01010101)
+for x in inputString:
+        send2LCD(0b1000000000 | ord(x))
+        print(0b1000000000 | ord(x))
+        utime.sleep_ms(500)
 LED.value(0)
-
-E.value(1)
-CS1.value(0)
-CS2.value(0)
-RST.value(0)
-turnOnLCD()
-print("LCD ON")
-utime.sleep(2)
-CS1.value(1)
-setcmd("0001000000")
-print("Y Position 0")
-utime.sleep(0.5)
-setcmd("0010111000")
-print("X Position 0")
-utime.sleep(0.5)
-setcmd("0011000000")
-print("Z Position 0")
-utime.sleep(0.5)
-setcmd("1001000001")
-print("A Position 0")
-utime.sleep(0.5)
-setcmd("1010111000")
-print("B Position 0")
-utime.sleep(0.5)
-
-utime.sleep(5)
-turnOffLCD()
-print("LCD OFF")
