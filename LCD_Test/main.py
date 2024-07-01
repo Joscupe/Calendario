@@ -4,7 +4,7 @@ import utime
 # Pin Definitions
 CS1 = Pin(0, Pin.OUT)
 CS2 = Pin(1, Pin.OUT)
-RST = Pin(21, Pin.OUT)
+RST = Pin(16, Pin.OUT)
 E = Pin(7, Pin.OUT)
 RW = Pin(6, Pin.OUT)
 RS = Pin(5, Pin.OUT)
@@ -26,7 +26,7 @@ charO = [0x3E, 0x41, 0x41, 0x41, 0x3E, 0x00]
 charW = [0x7F, 0x08, 0x14, 0x22, 0x41, 0x00]
 charR = [0x7F, 0x09, 0x09, 0x09, 0x76, 0x00]
 charD = [0x7F, 0x41, 0x41, 0x41, 0x3E, 0x00]
-pause = 1  # ms
+pause = 100  # ms
 
 
 def glcd_select_page0():
@@ -55,7 +55,7 @@ def pulse_e():
     print("Pulse E")
     utime.sleep_ms(pause)  # might adapt this time
     E.value(0)
-    utime.sleep_ms(10)
+    utime.sleep_ms(pause)
     print("Pulse E finsihed")
 
 
@@ -77,35 +77,29 @@ def glcd_display_char(char):
     for i in range(6):
         glcd_data_write(char[i])
 
+def glcd_init():
+    CS1.value(1)
+    CS2.value(1)
+    RST.value(1)
+    utime.sleep_ms(200)
+    glcd_cmd_write(0b00111110)  # display off
+    glcd_cmd_write(0b10000000)  # set y address to 0
+    glcd_cmd_write(0b10111000)  # set x address to page 0
+    glcd_cmd_write(0b11000000)  # set display start line to 0
+    glcd_cmd_write(0b00111111)  # display on
+
 
 # main
 LED.value(1)
-# turn on glcd
-glcd_select_page0()
-glcd_cmd_write(0b00111111)  # display on
-glcd_select_page1()
-glcd_cmd_write(0b00111111)  # display on
-utime.sleep_ms(pause)
-# set y address
-glcd_select_page0()
-glcd_cmd_write(0b10000000)  # set y address to 0
-glcd_select_page1()
-glcd_cmd_write(0b10000000)  # set y address to 0
-utime.sleep_ms(pause)
-# set display start line
-glcd_select_page0()
-glcd_cmd_write(0b11000000)  # set display start line to 0
-glcd_select_page1()
-glcd_cmd_write(0b11000000)  # set display start line to 0
-utime.sleep_ms(pause)
+glcd_init()
 # display hello on Page0
 glcd_select_page0()
-glcd_cmd_write(0b10111000)  # set x address to page 0
 glcd_display_char(charH)
 glcd_display_char(charE)
 glcd_display_char(charL)
 glcd_display_char(charL)
 glcd_display_char(charO)
+''''
 # display world on Page1
 glcd_select_page1()
 glcd_cmd_write(0b10111111)  # set x address to page 7
@@ -115,4 +109,5 @@ glcd_display_char(charR)
 glcd_display_char(charL)
 glcd_display_char(charD)
 utime.sleep_ms(pause)
+'''
 LED.value(0)
